@@ -1,6 +1,7 @@
 using ITensors
 using Statistics
 using Plots
+using CUDA
 
 # Inizializzazione.
 
@@ -44,14 +45,18 @@ x = range(start = -3., stop = 3., length = len)
 for (ind, h) in enumerate(x)
     Hxx = H_xx(N, h)
     H = MPO(Hxx,sites)  # Convertiamo H in un Matrix Product Operator.
+
+    H_cuda = cu(H)
         
     psi0 = random_mps(sites;linkdims=10)
+    psi0_cuda = cu(psi0)
     
     nsweeps = 6
     maxdim = [10,20,100,100,200,400]
     cutoff = [1E-10]
     
-    energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)
+    #energy,psi = dmrg(H,psi0;nsweeps,maxdim,cutoff)
+    energy, psi = dmrg(H_cuda, psi0_cuda; nsweeps, maxdim, cutoff)  # CUDA DMRG
     
     occupation_numbers[ind, :] = expect(psi, "N") # Calcoliamo <N> dove N è l'operatore densità.
 end
