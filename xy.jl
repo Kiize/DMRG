@@ -35,6 +35,8 @@ function H_xx(N, h)
     return os
 end
 
+####################################### DMRG. 
+
 len = 100
 occupation_numbers = zeros(len, N)
 x = range(start = -3., stop = 3., length = len)
@@ -42,12 +44,10 @@ x = range(start = -3., stop = 3., length = len)
 for (ind, h) in enumerate(x)
     Hxx = H_xx(N, h)
     H = MPO(Hxx,sites)  # Convertiamo H in un Matrix Product Operator.
-    
-    # DMRG. 
-    
+        
     psi0 = random_mps(sites;linkdims=10)
     
-    nsweeps = 7
+    nsweeps = 6
     maxdim = [10,20,100,100,200,400]
     cutoff = [1E-10]
     
@@ -57,7 +57,9 @@ for (ind, h) in enumerate(x)
 end
 
 y = mean(occupation_numbers, dims = 2)
-plot(x, y)
+
+####################################### Plot.
+plot(x, y, lab = "DMRG")
 
 function theoretic_value(h)
     if h <= -2
@@ -69,4 +71,8 @@ function theoretic_value(h)
     end
 end
 
-plot!(x, theoretic_value.(x))
+plot!(x, theoretic_value.(x), lab = "theoretical value")
+xlabel!("\$ μ/ \\textrm{w} \$")
+ylabel!("\$ < \\textrm{n}_i> \$")
+
+savefig("figures/xx.png")
